@@ -1,234 +1,1482 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1a6b4a" />
-  <meta name="description" content="NutriCalc — Clinical Nutrition Formula Calculator" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="NutriCalc" />
-  <title>NutriCalc — Clinical Nutrition Calculator</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#1a6b4a" />
+<meta name="description" content="NutriCalc — Clinical Nutrition Formula Calculator" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="NutriCalc" />
+<title>NutriCalc — Clinical Nutrition Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --green-deep: #1a6b4a;
+    --green-mid: #2d8f63;
+    --green-light: #4ab07e;
+    --green-pale: #e8f5ef;
+    --green-faint: #f4faf7;
+    --accent: #0fa66e;
+    --text-dark: #0d2318;
+    --text-mid: #2c4a3a;
+    --text-muted: #6b8f7c;
+    --white: #ffffff;
+    --border: #c8e4d8;
+    --shadow: 0 4px 24px rgba(26,107,74,0.10);
+    --shadow-card: 0 2px 12px rgba(26,107,74,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--green-faint);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── PAGE SYSTEM ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── LANDING ── */
+  #page-landing {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 48px;
+  }
+  #page-landing.active { display: flex; }
+
+  .landing-hero {
+    width: 100%;
+    background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 100%);
+    padding: 48px 24px 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .landing-hero::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    top: -120px; right: -80px;
+  }
+  .landing-hero::after {
+    content: '';
+    position: absolute;
+    width: 250px; height: 250px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    bottom: -60px; left: -40px;
+  }
+
+  .logo-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    position: relative; z-index: 1;
+  }
+  .logo-mark {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: #fff;
+    backdrop-filter: blur(4px);
+  }
+  .brand-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .brand-tagline {
+    color: rgba(255,255,255,0.75);
+    font-size: 14px;
+    font-weight: 400;
+    position: relative; z-index: 1;
+  }
+
+  .landing-card {
+    width: calc(100% - 48px);
+    max-width: 520px;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-top: -32px;
+    box-shadow: var(--shadow);
+    position: relative; z-index: 2;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .form-grid { display: flex; flex-direction: column; gap: 18px; }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 7px;
+    letter-spacing: 0.2px;
+  }
+  .unit-hint { font-weight: 400; color: var(--text-muted); }
+
+  .input-unit-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  input[type="number"], select {
+    flex: 1;
+    height: 46px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 14px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-dark);
+    background: var(--green-faint);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    width: 100%;
+  }
+  input[type="number"]:focus, select:focus {
+    border-color: var(--green-mid);
+    box-shadow: 0 0 0 3px rgba(45,143,99,0.12);
+    background: #fff;
+  }
+  input[type="number"]::placeholder { color: #b0c9bc; }
+
+  .unit-toggle {
+    display: flex;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .unit-btn {
+    padding: 0 14px;
+    height: 46px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .unit-btn.active {
+    background: var(--green-deep);
+    color: #fff;
+  }
+
+  .gender-row {
+    display: flex;
+    gap: 10px;
+  }
+  .gender-btn {
+    flex: 1;
+    height: 46px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--green-faint);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .gender-btn.active {
+    border-color: var(--green-mid);
+    background: var(--green-pale);
+    color: var(--green-deep);
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    width: 100%;
+    height: 52px;
+    background: linear-gradient(135deg, var(--green-deep), var(--green-mid));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 24px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity 0.2s, transform 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* Conversion charts */
+  .conversion-section {
+    width: calc(100% - 48px);
+    max-width: 520px;
+    margin-top: 24px;
+  }
+  .conversion-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+  .conversion-tables { display: flex; gap: 12px; flex-wrap: wrap; }
+  .conv-table-wrap {
+    flex: 1;
+    min-width: 180px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .conv-header {
+    background: var(--green-pale);
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green-deep);
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .conv-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .conv-table th {
+    background: var(--green-faint);
+    padding: 6px 14px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-mid);
+    border-bottom: 1px solid var(--border);
+  }
+  .conv-table td {
+    padding: 5px 14px;
+    text-align: center;
+    color: var(--text-mid);
+    border-bottom: 1px solid rgba(200,228,216,0.4);
+  }
+  .conv-table tr:last-child td { border-bottom: none; }
+
+  /* ── SHARED PAGE HEADER ── */
+  .page-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .back-btn {
+    height: 36px;
+    padding: 0 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .back-btn:hover { background: var(--green-pale); border-color: var(--green-light); }
+
+  .page-header-info { flex: 1; }
+  .page-header-info h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text-dark);
+  }
+  .page-header-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── PATIENT PILL ── */
+  .patient-pill {
+    background: var(--green-pale);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--green-deep);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── FORMULA DASHBOARD ── */
+  #page-dashboard { min-height: 100vh; }
+
+  .formula-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    padding: 24px 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ── FLOW PROGRESS ── */
+  .flow-progress {
+    padding: 16px 20px 0;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    font-size: 12px;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+  }
+  .flow-step.done { color: var(--green-mid); }
+  .flow-step.active { color: var(--green-deep); font-weight: 600; }
+  .flow-step-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-step.done .flow-step-dot { background: var(--green-mid); color: #fff; border-color: var(--green-mid); }
+  .flow-step.active .flow-step-dot { background: var(--green-deep); color: #fff; border-color: var(--green-deep); }
+  .flow-connector {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin: 0 6px;
+  }
+  .flow-connector.done { background: var(--green-mid); }
+
+  .flow-label { font-size: 11px; }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    padding: 20px 20px 0;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .section-header h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--text-dark);
+  }
+  .section-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── FORMULA CARD ── */
+  .formula-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .formula-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--green-pale), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .formula-card:hover { border-color: var(--green-light); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .formula-card:hover::before { opacity: 1; }
+
+  .card-icon {
+    width: 48px; height: 48px;
+    background: var(--green-pale);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    position: relative; z-index: 1;
+  }
+  .card-body { flex: 1; position: relative; z-index: 1; }
+  .card-body h3 { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 3px; }
+  .card-body p { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .card-arrow {
+    color: var(--text-muted);
+    font-size: 18px;
+    position: relative; z-index: 1;
+    transition: transform 0.2s;
+  }
+  .formula-card:hover .card-arrow { transform: translateX(4px); color: var(--green-deep); }
+
+  /* ── RESULTS ALREADY COMPUTED ── */
+  .results-summary {
+    padding: 0 20px;
+    max-width: 900px;
+    margin: 16px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .result-chip {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .result-chip-label { color: var(--text-muted); }
+  .result-chip-value { color: var(--green-deep); font-weight: 700; }
+
+  /* ── FORMULA PAGE ── */
+  #page-formula { min-height: 100vh; }
+
+  .formula-content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+  }
+
+  .formula-description {
+    background: var(--green-pale);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+  .formula-description strong { color: var(--green-deep); }
+
+  .extra-inputs { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .extra-inputs label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 7px;
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8f7c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  .calc-btn {
+    width: 100%;
+    height: 52px;
+    background: linear-gradient(135deg, var(--green-deep), var(--green-mid));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity 0.2s, transform 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 4px;
+  }
+  .calc-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+
+  /* ── RESULT CARD ── */
+  .result-card {
+    background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 100%);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    color: #fff;
+    margin-top: 24px;
+    animation: fadeUp 0.35s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .result-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 8px; }
+  .result-value { font-family: 'DM Serif Display', serif; font-size: 48px; line-height: 1; margin-bottom: 6px; }
+  .result-unit { font-size: 16px; opacity: 0.8; }
+  .result-interpretation {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    font-size: 14px;
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+
+  /* Multi-result (for formulas that return multiple values) */
+  .result-rows { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+  .result-row-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: fadeUp 0.3s ease;
+  }
+  .result-row-title { font-size: 13px; font-weight: 600; color: var(--text-mid); }
+  .result-row-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .result-row-val { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--green-deep); }
+  .result-row-unit { font-size: 11px; color: var(--text-muted); margin-top: 2px; text-align: right; }
+
+  /* ── NEXT STEP PROMPT ── */
+  .next-step-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1.5px dashed var(--border);
+  }
+  .next-step-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+  }
+  .next-step-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .next-step-cards { display: flex; flex-direction: column; gap: 10px; }
+  .next-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s;
+  }
+  .next-card:hover { border-color: var(--green-light); background: var(--green-pale); transform: translateX(4px); }
+  .next-card-icon { font-size: 20px; flex-shrink: 0; }
+  .next-card-body { flex: 1; }
+  .next-card-body h4 { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+  .next-card-body p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .next-card-arrow { color: var(--text-muted); font-size: 16px; transition: transform 0.2s; }
+  .next-card:hover .next-card-arrow { transform: translateX(4px); color: var(--green-deep); }
+
+  .note-box {
+    background: #fffbea;
+    border: 1px solid #f0d060;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #7a6200;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .landing-card { padding: 24px 18px; margin-top: -28px; width: calc(100% - 32px); }
+    .conversion-section { width: calc(100% - 32px); }
+    .formula-grid { padding: 16px 14px; gap: 10px; }
+    .formula-content { padding: 20px 14px 48px; }
+    .result-value { font-size: 38px; }
+    .flow-label { display: none; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- INSTALL BANNER -->
-  <div id="installBanner" class="install-banner hidden">
-    <div class="install-banner-content">
-      <span class="install-icon">📲</span>
-      <div>
-        <strong>Install NutriCalc</strong>
-        <p>Add to your home screen for quick access</p>
-      </div>
+<!-- ══════════════════════════════════════════
+     PAGE 1 — LANDING (Patient Inputs)
+══════════════════════════════════════════ -->
+<section id="page-landing" class="page active">
+  <div class="landing-hero">
+    <div class="logo-lockup">
+      <div class="logo-mark">N</div>
+      <div class="brand-name">NutriCalc</div>
     </div>
-    <div class="install-banner-actions">
-      <button id="installBtn" class="btn-install">Install App</button>
-      <button id="dismissBtn" class="btn-dismiss">✕</button>
-    </div>
+    <p class="brand-tagline">Clinical Nutrition Formula Calculator</p>
   </div>
 
-  <!-- LANDING PAGE -->
-  <section id="page-landing" class="page active">
-    <div class="landing-bg">
-      <div class="bg-circle c1"></div>
-      <div class="bg-circle c2"></div>
-      <div class="bg-circle c3"></div>
-    </div>
+  <div class="landing-card">
+    <h2 class="section-title">Enter Patient Details</h2>
+    <p class="section-sub">Provide basic measurements to get started</p>
 
-    <div class="landing-container">
-      <header class="landing-header">
-        <div class="logo-mark">N</div>
-        <div>
-          <h1 class="brand-name">NutriCalc</h1>
-          <p class="brand-tagline">Clinical Nutrition Formula Calculator</p>
-        </div>
-      </header>
-
-      <div class="landing-card">
-        <h2 class="section-title">Enter Patient Details</h2>
-        <p class="section-sub">Provide basic measurements to get started</p>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Age <span class="unit-hint">(years)</span></label>
-            <input type="number" id="age" placeholder="e.g. 35" min="1" max="120" />
-          </div>
-
-          <div class="form-group">
-            <label>Height</label>
-            <div class="input-unit-row">
-              <input type="number" id="height" placeholder="e.g. 170" step="0.1" />
-              <div class="unit-toggle">
-                <button class="unit-btn active" data-unit="cm" data-field="height">cm</button>
-                <button class="unit-btn" data-unit="ft" data-field="height">ft</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Weight</label>
-            <div class="input-unit-row">
-              <input type="number" id="weight" placeholder="e.g. 70" step="0.1" />
-              <div class="unit-toggle">
-                <button class="unit-btn active" data-unit="kg" data-field="weight">kg</button>
-                <button class="unit-btn" data-unit="lbs" data-field="weight">lbs</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn-primary" id="proceedBtn">
-          Calculate Formulas
-          <span class="btn-arrow">→</span>
-        </button>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Age <span class="unit-hint">(years)</span></label>
+        <input type="number" id="age" placeholder="e.g. 35" min="1" max="120" />
       </div>
 
-      <!-- CONVERSION CHARTS -->
-      <div class="conversion-section">
-        <h3 class="conversion-title">Unit Conversion Reference</h3>
-        <div class="conversion-tables">
+      <div class="form-group">
+        <label>Gender</label>
+        <div class="gender-row">
+          <button class="gender-btn" data-gender="male" onclick="selectGender('male')">♂ Male</button>
+          <button class="gender-btn" data-gender="female" onclick="selectGender('female')">♀ Female</button>
+        </div>
+      </div>
 
-          <div class="conv-table-wrap">
-            <div class="conv-header">
-              <span class="conv-icon">⚖️</span>
-              <span>Weight — kg ↔ lbs</span>
-            </div>
-            <table class="conv-table">
-              <thead><tr><th>kg</th><th>lbs</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>2.205</td></tr>
-                <tr><td>5</td><td>11.02</td></tr>
-                <tr><td>10</td><td>22.05</td></tr>
-                <tr><td>20</td><td>44.09</td></tr>
-                <tr><td>30</td><td>66.14</td></tr>
-                <tr><td>40</td><td>88.18</td></tr>
-                <tr><td>50</td><td>110.2</td></tr>
-                <tr><td>60</td><td>132.3</td></tr>
-                <tr><td>70</td><td>154.3</td></tr>
-                <tr><td>80</td><td>176.4</td></tr>
-                <tr><td>90</td><td>198.4</td></tr>
-                <tr><td>100</td><td>220.5</td></tr>
-              </tbody>
-            </table>
+      <div class="form-group">
+        <label>Height</label>
+        <div class="input-unit-row">
+          <input type="number" id="height" placeholder="e.g. 170" step="0.1" />
+          <div class="unit-toggle">
+            <button class="unit-btn active" data-unit="cm" data-field="height" onclick="selectUnit(this)">cm</button>
+            <button class="unit-btn" data-unit="ft" data-field="height" onclick="selectUnit(this)">ft</button>
           </div>
+        </div>
+      </div>
 
-          <div class="conv-table-wrap">
-            <div class="conv-header">
-              <span class="conv-icon">📏</span>
-              <span>Height — cm ↔ ft/in</span>
-            </div>
-            <table class="conv-table">
-              <thead><tr><th>cm</th><th>ft / in</th></tr></thead>
-              <tbody>
-                <tr><td>140</td><td>4′ 7″</td></tr>
-                <tr><td>145</td><td>4′ 9″</td></tr>
-                <tr><td>150</td><td>4′ 11″</td></tr>
-                <tr><td>155</td><td>5′ 1″</td></tr>
-                <tr><td>160</td><td>5′ 3″</td></tr>
-                <tr><td>165</td><td>5′ 5″</td></tr>
-                <tr><td>170</td><td>5′ 7″</td></tr>
-                <tr><td>175</td><td>5′ 9″</td></tr>
-                <tr><td>180</td><td>5′ 11″</td></tr>
-                <tr><td>185</td><td>6′ 1″</td></tr>
-                <tr><td>190</td><td>6′ 3″</td></tr>
-                <tr><td>195</td><td>6′ 5″</td></tr>
-              </tbody>
-            </table>
+      <div class="form-group">
+        <label>Weight</label>
+        <div class="input-unit-row">
+          <input type="number" id="weight" placeholder="e.g. 70" step="0.1" />
+          <div class="unit-toggle">
+            <button class="unit-btn active" data-unit="kg" data-field="weight" onclick="selectUnit(this)">kg</button>
+            <button class="unit-btn" data-unit="lbs" data-field="weight" onclick="selectUnit(this)">lbs</button>
           </div>
-
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- FORMULA DASHBOARD -->
-  <section id="page-dashboard" class="page">
-    <div class="dash-header">
-      <button class="back-btn" id="backToLanding">← Back</button>
-      <div class="dash-title-wrap">
-        <h2 class="dash-title">Select a Formula</h2>
-        <p class="dash-sub" id="patientSummary"></p>
+    <button class="btn-primary" onclick="proceedToDashboard()">
+      Calculate Formulas <span>→</span>
+    </button>
+  </div>
+
+  <!-- Conversion Charts -->
+  <div class="conversion-section">
+    <h3 class="conversion-title">Unit Conversion Reference</h3>
+    <div class="conversion-tables">
+      <div class="conv-table-wrap">
+        <div class="conv-header"><span>⚖️</span> Weight — kg ↔ lbs</div>
+        <table class="conv-table">
+          <thead><tr><th>kg</th><th>lbs</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>2.205</td></tr><tr><td>5</td><td>11.02</td></tr>
+            <tr><td>10</td><td>22.05</td></tr><tr><td>20</td><td>44.09</td></tr>
+            <tr><td>30</td><td>66.14</td></tr><tr><td>40</td><td>88.18</td></tr>
+            <tr><td>50</td><td>110.2</td></tr><tr><td>60</td><td>132.3</td></tr>
+            <tr><td>70</td><td>154.3</td></tr><tr><td>80</td><td>176.4</td></tr>
+            <tr><td>90</td><td>198.4</td></tr><tr><td>100</td><td>220.5</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="conv-table-wrap">
+        <div class="conv-header"><span>📏</span> Height — cm ↔ ft/in</div>
+        <table class="conv-table">
+          <thead><tr><th>cm</th><th>ft / in</th></tr></thead>
+          <tbody>
+            <tr><td>140</td><td>4′ 7″</td></tr><tr><td>145</td><td>4′ 9″</td></tr>
+            <tr><td>150</td><td>4′ 11″</td></tr><tr><td>155</td><td>5′ 1″</td></tr>
+            <tr><td>160</td><td>5′ 3″</td></tr><tr><td>165</td><td>5′ 5″</td></tr>
+            <tr><td>170</td><td>5′ 7″</td></tr><tr><td>175</td><td>5′ 9″</td></tr>
+            <tr><td>180</td><td>5′ 11″</td></tr><tr><td>185</td><td>6′ 1″</td></tr>
+            <tr><td>190</td><td>6′ 3″</td></tr><tr><td>195</td><td>6′ 5″</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="formula-grid" id="formulaGrid">
-
-      <div class="formula-card" data-formula="bmi">
-        <div class="card-icon">📊</div>
-        <h3>BMI</h3>
-        <p>Body Mass Index — weight-to-height ratio</p>
-        <span class="card-arrow">→</span>
-      </div>
-
-      <div class="formula-card" data-formula="curreri">
-        <div class="card-icon">🔥</div>
-        <h3>Curreri Formula</h3>
-        <p>Caloric needs for burn patients</p>
-        <span class="card-arrow">→</span>
-      </div>
-
-      <div class="formula-card" data-formula="ibw">
-        <div class="card-icon">🎯</div>
-        <h3>Ideal Body Weight</h3>
-        <p>Estimated ideal weight by gender & height</p>
-        <span class="card-arrow">→</span>
-      </div>
-
-      <div class="formula-card" data-formula="ajbw">
-        <div class="card-icon">⚖️</div>
-        <h3>Adjusted Body Weight</h3>
-        <p>Corrected weight for obese individuals</p>
-        <span class="card-arrow">→</span>
-      </div>
-
-      <div class="formula-card" data-formula="injury">
-        <div class="card-icon">🩺</div>
-        <h3>Injury Factor</h3>
-        <p>Metabolic stress multiplier by injury type</p>
-        <span class="card-arrow">→</span>
-      </div>
-
-      <div class="formula-card" data-formula="pal">
-        <div class="card-icon">🏃</div>
-        <h3>Physical Activity Level</h3>
-        <p>Activity factor for energy requirements</p>
-        <span class="card-arrow">→</span>
-      </div>
-
-      <div class="formula-card" data-formula="harris">
-        <div class="card-icon">❤️</div>
-        <h3>Harris-Benedict</h3>
-        <p>BMR estimation — classic clinical formula</p>
-        <span class="card-arrow">→</span>
-      </div>
-
-      <div class="formula-card" data-formula="mifflin">
-        <div class="card-icon">🧬</div>
-        <h3>Mifflin St. Jeor</h3>
-        <p>Modern BMR formula with higher accuracy</p>
-        <span class="card-arrow">→</span>
-      </div>
-
+<!-- ══════════════════════════════════════════
+     PAGE 2 — FORMULA DASHBOARD
+══════════════════════════════════════════ -->
+<section id="page-dashboard" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('landing')">← Back</button>
+    <div class="page-header-info">
+      <h2>Select a Formula</h2>
+      <p id="dashboardSub">Step 1 of the clinical workflow</p>
     </div>
-  </section>
+    <div class="patient-pill" id="patientPill"></div>
+  </div>
 
-  <!-- FORMULA RESULT PAGE -->
-  <section id="page-formula" class="page">
-    <div class="formula-page-header">
-      <button class="back-btn" id="backToDash">← Formulas</button>
-      <h2 class="formula-page-title" id="formulaTitle"></h2>
+  <div class="flow-progress" id="flowProgress"></div>
+  <div class="results-summary" id="resultsSummary"></div>
+  <div class="section-header" id="dashboardSectionHeader">
+    <h3 id="dashboardSectionTitle"></h3>
+    <p id="dashboardSectionDesc"></p>
+  </div>
+
+  <div class="formula-grid" id="formulaGrid"></div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 — FORMULA RESULT
+══════════════════════════════════════════ -->
+<section id="page-formula" class="page">
+  <div class="page-header">
+    <button class="back-btn" id="formulaBackBtn" onclick="goBackFromFormula()">← Formulas</button>
+    <div class="page-header-info">
+      <h2 id="formulaTitle">Formula</h2>
+      <p id="formulaSub"></p>
     </div>
+    <div class="patient-pill" id="formulaPatientPill"></div>
+  </div>
+  <div class="formula-content" id="formulaContent"></div>
+</section>
 
-    <div class="formula-content" id="formulaContent">
-      <!-- Dynamically populated -->
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const state = {
+  // Patient inputs
+  age: null,
+  gender: null,
+  heightCm: null,
+  weightKg: null,
+  heightUnit: 'cm',
+  weightUnit: 'kg',
+
+  // Computed results (persisted through flow)
+  results: {
+    bmi: null,
+    ibw: null,
+    ajbw: null,
+    harris: null,
+    mifflin: null,
+    curreri: null,
+    injury: null,
+    pal: null,
+    injuryAndPal: null,
+  },
+
+  // Current flow step:
+  // 'step1' → BMI, IBW, AjBW
+  // 'step2' → Harris-Benedict, Mifflin, Curreri
+  // 'step3' → Injury Factor, PAL, Both
+  flowStep: 'step1',
+
+  // Which formula page is open
+  currentFormula: null,
+};
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goBackFromFormula() {
+  goTo('dashboard');
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════
+//  LANDING INTERACTIONS
+// ══════════════════════════════════════════
+function selectGender(g) {
+  state.gender = g;
+  document.querySelectorAll('.gender-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.gender === g);
+  });
+}
+
+function selectUnit(btn) {
+  const field = btn.dataset.field;
+  const unit = btn.dataset.unit;
+  btn.closest('.unit-toggle').querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (field === 'height') state.heightUnit = unit;
+  if (field === 'weight') state.weightUnit = unit;
+}
+
+function proceedToDashboard() {
+  const age = parseFloat(document.getElementById('age').value);
+  const height = parseFloat(document.getElementById('height').value);
+  const weight = parseFloat(document.getElementById('weight').value);
+
+  if (!age || age < 1 || age > 120) return alert('Please enter a valid age (1–120).');
+  if (!state.gender) return alert('Please select a gender.');
+  if (!height || height <= 0) return alert('Please enter a valid height.');
+  if (!weight || weight <= 0) return alert('Please enter a valid weight.');
+
+  state.age = age;
+
+  // Convert to metric
+  state.heightCm = state.heightUnit === 'ft' ? height * 30.48 : height;
+  state.weightKg = state.weightUnit === 'lbs' ? weight / 2.2046 : weight;
+
+  // Reset results and flow when patient data changes
+  state.results = { bmi:null, ibw:null, ajbw:null, harris:null, mifflin:null, curreri:null, injury:null, pal:null, injuryAndPal:null };
+  state.flowStep = 'step1';
+
+  renderDashboard();
+  goTo('dashboard');
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD RENDERER
+// ══════════════════════════════════════════
+function renderDashboard() {
+  const pill = document.getElementById('patientPill');
+  const summary = `${state.age}y • ${state.gender === 'male' ? '♂' : '♀'} • ${state.heightCm.toFixed(0)}cm • ${state.weightKg.toFixed(1)}kg`;
+  pill.textContent = summary;
+  document.getElementById('formulaPatientPill').textContent = summary;
+
+  renderFlowProgress();
+  renderResultsSummary();
+  renderFormulaGrid();
+}
+
+function renderFlowProgress() {
+  const steps = [
+    { id: 'step1', label: 'BMI / IBW / AjBW' },
+    { id: 'step2', label: 'BMR Formula' },
+    { id: 'step3', label: 'Activity / Injury' },
+  ];
+  const current = state.flowStep;
+  const order = ['step1','step2','step3'];
+  const currentIdx = order.indexOf(current);
+
+  let html = '<div class="flow-steps">';
+  steps.forEach((s, i) => {
+    const idx = order.indexOf(s.id);
+    const cls = idx < currentIdx ? 'done' : idx === currentIdx ? 'active' : '';
+    html += `<div class="flow-step ${cls}">
+      <div class="flow-step-dot">${idx < currentIdx ? '✓' : i+1}</div>
+      <span class="flow-label">${s.label}</span>
+    </div>`;
+    if (i < steps.length - 1) {
+      html += `<div class="flow-connector ${idx < currentIdx ? 'done' : ''}"></div>`;
+    }
+  });
+  html += '</div>';
+  document.getElementById('flowProgress').innerHTML = html;
+}
+
+function renderResultsSummary() {
+  const chips = [];
+  const r = state.results;
+  if (r.bmi !== null) chips.push({ label: 'BMI', val: r.bmi.toFixed(1), unit: 'kg/m²' });
+  if (r.ibw !== null) chips.push({ label: 'IBW', val: r.ibw.toFixed(1), unit: 'kg' });
+  if (r.ajbw !== null) chips.push({ label: 'AjBW', val: r.ajbw.toFixed(1), unit: 'kg' });
+  if (r.harris !== null) chips.push({ label: 'H-B BMR', val: Math.round(r.harris), unit: 'kcal/d' });
+  if (r.mifflin !== null) chips.push({ label: 'Mifflin BMR', val: Math.round(r.mifflin), unit: 'kcal/d' });
+  if (r.curreri !== null) chips.push({ label: 'Curreri', val: Math.round(r.curreri), unit: 'kcal/d' });
+  if (r.injury !== null) chips.push({ label: 'Injury adj.', val: Math.round(r.injury), unit: 'kcal/d' });
+  if (r.pal !== null) chips.push({ label: 'TDEE (PAL)', val: Math.round(r.pal), unit: 'kcal/d' });
+
+  document.getElementById('resultsSummary').innerHTML = chips.map(c =>
+    `<div class="result-chip"><span class="result-chip-label">${c.label}</span><span class="result-chip-value">${c.val} <small>${c.unit}</small></span></div>`
+  ).join('');
+}
+
+function renderFormulaGrid() {
+  const step = state.flowStep;
+  let title, desc, cards;
+
+  if (step === 'step1') {
+    title = 'Step 1 — Anthropometric Formulas';
+    desc = 'Calculate BMI, Ideal Body Weight, and Adjusted Body Weight from patient inputs.';
+    cards = [
+      { id: 'bmi',  icon: '📊', name: 'BMI', desc: 'Body Mass Index — weight-to-height ratio (kg/m²)', done: state.results.bmi !== null },
+      { id: 'ibw',  icon: '🎯', name: 'Ideal Body Weight', desc: 'Devine formula — estimated ideal weight by gender & height', done: state.results.ibw !== null },
+      { id: 'ajbw', icon: '⚖️', name: 'Adjusted Body Weight', desc: 'Corrected weight for obese individuals (IBW + 25% excess)', done: state.results.ajbw !== null },
+    ];
+  } else if (step === 'step2') {
+    title = 'Step 2 — Energy Requirement Formula';
+    desc = 'Select one formula to estimate the patient\'s Basal Metabolic Rate (BMR) or caloric needs.';
+    cards = [
+      { id: 'harris',  icon: '❤️', name: 'Harris-Benedict', desc: 'Revised 1984 — classic BMR estimation by gender, weight, height, age', done: state.results.harris !== null },
+      { id: 'mifflin', icon: '🧬', name: 'Mifflin St. Jeor', desc: 'Modern 1990 formula — generally more accurate for most populations', done: state.results.mifflin !== null },
+      { id: 'curreri', icon: '🔥', name: 'Curreri Formula', desc: 'Burn patients only — caloric needs based on weight and %TBSA burned', done: state.results.curreri !== null },
+    ];
+  } else if (step === 'step3') {
+    title = 'Step 3 — Adjustment Factors';
+    desc = 'Apply activity level and/or injury/stress factors to the calculated BMR.';
+    cards = [
+      { id: 'injury',       icon: '🩺', name: 'Injury Factor only', desc: 'Apply metabolic stress multiplier by injury/surgery type', done: state.results.injury !== null },
+      { id: 'pal',          icon: '🏃', name: 'Physical Activity Level only', desc: 'Apply activity multiplier to get Total Daily Energy Expenditure', done: state.results.pal !== null },
+      { id: 'injuryAndPal', icon: '⚡', name: 'Injury Factor + PAL', desc: 'Apply both injury stress and activity level adjustments together', done: state.results.injuryAndPal !== null },
+    ];
+  }
+
+  document.getElementById('dashboardSectionTitle').textContent = title;
+  document.getElementById('dashboardSectionDesc').textContent = desc;
+
+  document.getElementById('formulaGrid').innerHTML = cards.map(c => `
+    <div class="formula-card ${c.done ? 'done-card' : ''}" onclick="openFormula('${c.id}')">
+      <div class="card-icon">${c.icon}${c.done ? '<span style="position:absolute;top:-4px;right:-4px;background:var(--green-mid);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;">✓</span>' : ''}</div>
+      <div class="card-body">
+        <h3>${c.name}</h3>
+        <p>${c.desc}</p>
+      </div>
+      <span class="card-arrow">${c.done ? '↺' : '→'}</span>
     </div>
-  </section>
+  `).join('');
 
-  <script src="app.js"></script>
+  // Sub-text under header
+  if (step === 'step1') {
+    document.getElementById('dashboardSub').textContent = 'Complete all 3 before proceeding to BMR formulas';
+  } else if (step === 'step2') {
+    document.getElementById('dashboardSub').textContent = 'Select one BMR formula — Curreri is for burn patients only';
+  } else {
+    document.getElementById('dashboardSub').textContent = 'Apply adjustment factors to the calculated BMR';
+  }
+}
+
+// ══════════════════════════════════════════
+//  OPEN FORMULA PAGE
+// ══════════════════════════════════════════
+function openFormula(id) {
+  state.currentFormula = id;
+  const titles = {
+    bmi: 'Body Mass Index (BMI)',
+    ibw: 'Ideal Body Weight (IBW)',
+    ajbw: 'Adjusted Body Weight (AjBW)',
+    harris: 'Harris-Benedict Formula',
+    mifflin: 'Mifflin St. Jeor Formula',
+    curreri: 'Curreri Formula',
+    injury: 'Injury / Stress Factor',
+    pal: 'Physical Activity Level (PAL)',
+    injuryAndPal: 'Injury Factor + PAL',
+  };
+  document.getElementById('formulaTitle').textContent = titles[id];
+  document.getElementById('formulaSub').textContent = 'Enter any additional inputs below';
+
+  const content = document.getElementById('formulaContent');
+  content.innerHTML = buildFormulaHTML(id);
+
+  goTo('formula');
+}
+
+// ══════════════════════════════════════════
+//  BUILD FORMULA CONTENT HTML
+// ══════════════════════════════════════════
+function buildFormulaHTML(id) {
+  const W = state.weightKg, H = state.heightCm, A = state.age, G = state.gender;
+
+  if (id === 'bmi') {
+    return `
+      <div class="formula-description">
+        <strong>Formula:</strong> Weight (kg) ÷ Height² (m)<br>
+        <strong>Using:</strong> ${W.toFixed(1)} kg ÷ (${(H/100).toFixed(2)} m)² = <em>computed below</em>
+      </div>
+      <button class="calc-btn" onclick="calcBMI()">🔢 Calculate BMI</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'ibw') {
+    return `
+      <div class="formula-description">
+        <strong>Devine Formula</strong><br>
+        Male: 50 + 2.3 × (Height in inches − 60)<br>
+        Female: 45.5 + 2.3 × (Height in inches − 60)<br>
+        <strong>Using:</strong> ${G} • ${H.toFixed(1)} cm (${(H/2.54).toFixed(1)} in)
+      </div>
+      <button class="calc-btn" onclick="calcIBW()">🔢 Calculate IBW</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'ajbw') {
+    const ibw = state.results.ibw;
+    if (ibw === null) {
+      return `<div class="note-box">⚠️ Please calculate <strong>Ideal Body Weight (IBW)</strong> first — AjBW requires it.</div>
+              <button class="calc-btn" style="margin-top:16px" onclick="openFormula('ibw')">→ Go to IBW</button>`;
+    }
+    return `
+      <div class="formula-description">
+        <strong>Formula:</strong> IBW + 0.25 × (Actual Weight − IBW)<br>
+        <strong>Using:</strong> IBW = ${ibw.toFixed(1)} kg • Actual = ${W.toFixed(1)} kg<br>
+        ${W <= ibw ? '<em>Note: Actual weight ≤ IBW — AjBW equals IBW in this case.</em>' : ''}
+      </div>
+      <button class="calc-btn" onclick="calcAjBW()">🔢 Calculate AjBW</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'harris') {
+    return `
+      <div class="formula-description">
+        <strong>Harris-Benedict (Revised 1984)</strong><br>
+        Male: 88.362 + (13.397×W) + (4.799×H) − (5.677×A)<br>
+        Female: 447.593 + (9.247×W) + (3.098×H) − (4.330×A)<br>
+        <strong>Using:</strong> ${G} • ${W.toFixed(1)}kg • ${H.toFixed(0)}cm • ${A}y
+      </div>
+      <button class="calc-btn" onclick="calcHarris()">🔢 Calculate BMR</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'mifflin') {
+    return `
+      <div class="formula-description">
+        <strong>Mifflin St. Jeor (1990)</strong><br>
+        Male: (10×W) + (6.25×H) − (5×A) + 5<br>
+        Female: (10×W) + (6.25×H) − (5×A) − 161<br>
+        <strong>Using:</strong> ${G} • ${W.toFixed(1)}kg • ${H.toFixed(0)}cm • ${A}y
+      </div>
+      <button class="calc-btn" onclick="calcMifflin()">🔢 Calculate BMR</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'curreri') {
+    return `
+      <div class="formula-description">
+        <strong>Curreri Formula:</strong> 25 × Weight (kg) + 40 × %TBSA<br>
+        <strong>Use case:</strong> Burn patients only — estimates additional caloric needs due to burns.
+      </div>
+      <div class="extra-inputs">
+        <div class="form-group">
+          <label>Total Body Surface Area Burned <span class="unit-hint">(%TBSA, 1–100)</span></label>
+          <input type="number" id="tbsa" placeholder="e.g. 20" min="1" max="100" />
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcCurreri()">🔢 Calculate Caloric Need</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'injury') {
+    const bmr = getAvailableBMR();
+    if (!bmr) return noBMRWarning();
+    return `
+      <div class="formula-description">
+        <strong>Formula:</strong> BMR × Injury Factor<br>
+        <strong>BMR used:</strong> ${Math.round(bmr.val)} kcal/day (${bmr.src})
+      </div>
+      <div class="extra-inputs">
+        <div class="form-group">
+          <label>Injury / Stress Category</label>
+          <select id="injuryFactor">
+            <option value="">— Select category —</option>
+            <option value="1.0">Minor Surgery / Uncomplicated (×1.0)</option>
+            <option value="1.2">Skeletal Trauma (×1.2)</option>
+            <option value="1.25">Major Surgery (×1.25)</option>
+            <option value="1.4">Sepsis / Peritonitis (×1.4)</option>
+            <option value="1.5">Burns &lt;20% TBSA (×1.5)</option>
+            <option value="1.75">Burns 20–40% TBSA (×1.75)</option>
+            <option value="2.0">Burns &gt;40% TBSA (×2.0)</option>
+            <option value="1.6">Severe Head Injury (×1.6)</option>
+          </select>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcInjury()">🔢 Calculate Adjusted Need</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'pal') {
+    const bmr = getAvailableBMR();
+    if (!bmr) return noBMRWarning();
+    return `
+      <div class="formula-description">
+        <strong>Formula:</strong> BMR × PAL = TDEE<br>
+        <strong>BMR used:</strong> ${Math.round(bmr.val)} kcal/day (${bmr.src})
+      </div>
+      <div class="extra-inputs">
+        <div class="form-group">
+          <label>Activity Level</label>
+          <select id="palFactor">
+            <option value="">— Select activity level —</option>
+            <option value="1.200">Sedentary — little or no exercise (×1.20)</option>
+            <option value="1.375">Lightly Active — light exercise 1–3 d/wk (×1.375)</option>
+            <option value="1.550">Moderately Active — moderate exercise 3–5 d/wk (×1.55)</option>
+            <option value="1.725">Very Active — hard exercise 6–7 d/wk (×1.725)</option>
+            <option value="1.900">Extra Active — very hard exercise / physical job (×1.90)</option>
+          </select>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcPAL()">🔢 Calculate TDEE</button>
+      <div id="result-area"></div>`;
+  }
+
+  if (id === 'injuryAndPal') {
+    const bmr = getAvailableBMR();
+    if (!bmr) return noBMRWarning();
+    return `
+      <div class="formula-description">
+        <strong>Formula:</strong> BMR × Injury Factor × PAL<br>
+        <strong>BMR used:</strong> ${Math.round(bmr.val)} kcal/day (${bmr.src})<br>
+        Both adjustment factors are applied together.
+      </div>
+      <div class="extra-inputs">
+        <div class="form-group">
+          <label>Injury / Stress Category</label>
+          <select id="injuryFactor2">
+            <option value="">— Select category —</option>
+            <option value="1.0">Minor Surgery / Uncomplicated (×1.0)</option>
+            <option value="1.2">Skeletal Trauma (×1.2)</option>
+            <option value="1.25">Major Surgery (×1.25)</option>
+            <option value="1.4">Sepsis / Peritonitis (×1.4)</option>
+            <option value="1.5">Burns &lt;20% TBSA (×1.5)</option>
+            <option value="1.75">Burns 20–40% TBSA (×1.75)</option>
+            <option value="2.0">Burns &gt;40% TBSA (×2.0)</option>
+            <option value="1.6">Severe Head Injury (×1.6)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Activity Level</label>
+          <select id="palFactor2">
+            <option value="">— Select activity level —</option>
+            <option value="1.200">Sedentary (×1.20)</option>
+            <option value="1.375">Lightly Active (×1.375)</option>
+            <option value="1.550">Moderately Active (×1.55)</option>
+            <option value="1.725">Very Active (×1.725)</option>
+            <option value="1.900">Extra Active (×1.90)</option>
+          </select>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcBoth()">🔢 Calculate Combined Need</button>
+      <div id="result-area"></div>`;
+  }
+
+  return '<p>Formula not found.</p>';
+}
+
+function noBMRWarning() {
+  const hasCurreri = state.results.curreri !== null;
+  return `
+    <div class="note-box">⚠️ Please calculate a BMR formula first (Harris-Benedict, Mifflin St. Jeor, or Curreri) before applying adjustment factors.</div>
+    <button class="calc-btn" style="margin-top:16px" onclick="goBackFromFormula()">← Back to Formula Selection</button>`;
+}
+
+function getAvailableBMR() {
+  if (state.results.harris !== null) return { val: state.results.harris, src: 'Harris-Benedict' };
+  if (state.results.mifflin !== null) return { val: state.results.mifflin, src: 'Mifflin St. Jeor' };
+  if (state.results.curreri !== null) return { val: state.results.curreri, src: 'Curreri' };
+  return null;
+}
+
+// ══════════════════════════════════════════
+//  CALCULATION FUNCTIONS
+// ══════════════════════════════════════════
+function showResult(html) {
+  document.getElementById('result-area').innerHTML = html;
+  document.getElementById('result-area').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── BMI ──
+function calcBMI() {
+  const hm = state.heightCm / 100;
+  const bmi = state.weightKg / (hm * hm);
+  state.results.bmi = bmi;
+
+  let cat, color;
+  if (bmi < 18.5)      { cat = 'Underweight';       color = '#3b82f6'; }
+  else if (bmi < 25)   { cat = 'Normal weight';      color = '#22c55e'; }
+  else if (bmi < 30)   { cat = 'Overweight';         color = '#f59e0b'; }
+  else if (bmi < 35)   { cat = 'Obese Class I';      color = '#ef4444'; }
+  else if (bmi < 40)   { cat = 'Obese Class II';     color = '#dc2626'; }
+  else                  { cat = 'Obese Class III';    color = '#991b1b'; }
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Body Mass Index</div>
+      <div class="result-value">${bmi.toFixed(1)} <span class="result-unit">kg/m²</span></div>
+      <div class="result-interpretation">
+        WHO Classification: <strong>${cat}</strong><br>
+        Height: ${state.heightCm.toFixed(1)} cm | Weight: ${state.weightKg.toFixed(1)} kg
+      </div>
+    </div>
+    ${nextStepPrompt()}
+  `);
+  advanceFlowIfReady();
+}
+
+// ── IBW ──
+function calcIBW() {
+  const inches = state.heightCm / 2.54;
+  let ibw;
+  if (state.gender === 'male') ibw = 50 + 2.3 * (inches - 60);
+  else ibw = 45.5 + 2.3 * (inches - 60);
+  if (ibw < 0) ibw = 0;
+  state.results.ibw = ibw;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Ideal Body Weight (Devine)</div>
+      <div class="result-value">${ibw.toFixed(1)} <span class="result-unit">kg</span></div>
+      <div class="result-interpretation">
+        ${state.gender === 'male' ? '50' : '45.5'} + 2.3 × (${(state.heightCm/2.54).toFixed(1)}″ − 60) = ${ibw.toFixed(2)} kg<br>
+        Actual weight: ${state.weightKg.toFixed(1)} kg
+        ${state.weightKg > ibw ? ` — patient is <strong>${(state.weightKg - ibw).toFixed(1)} kg above IBW</strong>` : ' — patient is at or below IBW'}
+      </div>
+    </div>
+    ${nextStepPrompt()}
+  `);
+  advanceFlowIfReady();
+}
+
+// ── AjBW ──
+function calcAjBW() {
+  const ibw = state.results.ibw;
+  const ajbw = state.weightKg <= ibw ? ibw : ibw + 0.25 * (state.weightKg - ibw);
+  state.results.ajbw = ajbw;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Adjusted Body Weight</div>
+      <div class="result-value">${ajbw.toFixed(1)} <span class="result-unit">kg</span></div>
+      <div class="result-interpretation">
+        ${state.weightKg <= ibw
+          ? 'Actual weight ≤ IBW — AjBW equals IBW.'
+          : `IBW (${ibw.toFixed(1)}) + 0.25 × (${state.weightKg.toFixed(1)} − ${ibw.toFixed(1)}) = <strong>${ajbw.toFixed(2)} kg</strong>`}
+      </div>
+    </div>
+    ${nextStepPrompt()}
+  `);
+  advanceFlowIfReady();
+}
+
+// ── HARRIS-BENEDICT ──
+function calcHarris() {
+  const W = state.weightKg, H = state.heightCm, A = state.age;
+  let bmr;
+  if (state.gender === 'male') bmr = 88.362 + (13.397*W) + (4.799*H) - (5.677*A);
+  else bmr = 447.593 + (9.247*W) + (3.098*H) - (4.330*A);
+  state.results.harris = bmr;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Harris-Benedict BMR (1984)</div>
+      <div class="result-value">${Math.round(bmr)} <span class="result-unit">kcal/day</span></div>
+      <div class="result-interpretation">
+        ${state.gender === 'male'
+          ? `88.362 + (13.397×${W.toFixed(1)}) + (4.799×${H.toFixed(0)}) − (5.677×${A})`
+          : `447.593 + (9.247×${W.toFixed(1)}) + (3.098×${H.toFixed(0)}) − (4.330×${A})`}
+        = <strong>${bmr.toFixed(1)} kcal/day</strong><br>
+        This is the Basal Metabolic Rate — resting energy expenditure.
+      </div>
+    </div>
+    ${nextStepPrompt()}
+  `);
+  advanceFlowIfReady();
+}
+
+// ── MIFFLIN ──
+function calcMifflin() {
+  const W = state.weightKg, H = state.heightCm, A = state.age;
+  let bmr;
+  if (state.gender === 'male') bmr = (10*W) + (6.25*H) - (5*A) + 5;
+  else bmr = (10*W) + (6.25*H) - (5*A) - 161;
+  state.results.mifflin = bmr;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Mifflin St. Jeor BMR (1990)</div>
+      <div class="result-value">${Math.round(bmr)} <span class="result-unit">kcal/day</span></div>
+      <div class="result-interpretation">
+        (10×${W.toFixed(1)}) + (6.25×${H.toFixed(0)}) − (5×${A}) ${state.gender === 'male' ? '+5' : '−161'}
+        = <strong>${bmr.toFixed(1)} kcal/day</strong><br>
+        Generally considered more accurate than Harris-Benedict for modern populations.
+      </div>
+    </div>
+    ${nextStepPrompt()}
+  `);
+  advanceFlowIfReady();
+}
+
+// ── CURRERI ──
+function calcCurreri() {
+  const tbsa = parseFloat(document.getElementById('tbsa').value);
+  if (!tbsa || tbsa < 1 || tbsa > 100) return alert('Please enter a valid %TBSA (1–100).');
+  const kcal = 25 * state.weightKg + 40 * tbsa;
+  state.results.curreri = kcal;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Curreri Formula — Burn Caloric Need</div>
+      <div class="result-value">${Math.round(kcal)} <span class="result-unit">kcal/day</span></div>
+      <div class="result-interpretation">
+        25 × ${state.weightKg.toFixed(1)}kg + 40 × ${tbsa}%TBSA = <strong>${kcal.toFixed(0)} kcal/day</strong><br>
+        This represents the estimated total caloric requirement for burn management.
+      </div>
+    </div>
+    ${nextStepPrompt()}
+  `);
+  advanceFlowIfReady();
+}
+
+// ── INJURY ──
+function calcInjury() {
+  const factor = parseFloat(document.getElementById('injuryFactor').value);
+  if (!factor) return alert('Please select an injury category.');
+  const bmr = getAvailableBMR();
+  const adjusted = bmr.val * factor;
+  state.results.injury = adjusted;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Injury-Adjusted Energy Need</div>
+      <div class="result-value">${Math.round(adjusted)} <span class="result-unit">kcal/day</span></div>
+      <div class="result-interpretation">
+        ${Math.round(bmr.val)} kcal/day × ${factor} (injury factor) = <strong>${Math.round(adjusted)} kcal/day</strong><br>
+        BMR source: ${bmr.src}
+      </div>
+    </div>
+  `);
+}
+
+// ── PAL ──
+function calcPAL() {
+  const factor = parseFloat(document.getElementById('palFactor').value);
+  if (!factor) return alert('Please select an activity level.');
+  const bmr = getAvailableBMR();
+  const tdee = bmr.val * factor;
+  state.results.pal = tdee;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Total Daily Energy Expenditure (TDEE)</div>
+      <div class="result-value">${Math.round(tdee)} <span class="result-unit">kcal/day</span></div>
+      <div class="result-interpretation">
+        ${Math.round(bmr.val)} kcal/day × ${factor} (PAL) = <strong>${Math.round(tdee)} kcal/day</strong><br>
+        BMR source: ${bmr.src}
+      </div>
+    </div>
+  `);
+}
+
+// ── INJURY + PAL ──
+function calcBoth() {
+  const injury = parseFloat(document.getElementById('injuryFactor2').value);
+  const pal = parseFloat(document.getElementById('palFactor2').value);
+  if (!injury) return alert('Please select an injury category.');
+  if (!pal) return alert('Please select an activity level.');
+  const bmr = getAvailableBMR();
+  const combined = bmr.val * injury * pal;
+  state.results.injuryAndPal = combined;
+
+  showResult(`
+    <div class="result-card">
+      <div class="result-label">Combined Energy Need (Injury + Activity)</div>
+      <div class="result-value">${Math.round(combined)} <span class="result-unit">kcal/day</span></div>
+      <div class="result-interpretation">
+        ${Math.round(bmr.val)} × ${injury} (injury) × ${pal} (PAL) = <strong>${Math.round(combined)} kcal/day</strong><br>
+        BMR source: ${bmr.src}
+      </div>
+    </div>
+  `);
+}
+
+// ══════════════════════════════════════════
+//  FLOW ADVANCEMENT LOGIC
+// ══════════════════════════════════════════
+function advanceFlowIfReady() {
+  const r = state.results;
+  if (state.flowStep === 'step1') {
+    // Show "proceed" prompt when all 3 are done — or let user proceed whenever IBW+AjBW done
+    // We auto-advance step visually in renderFlowProgress, but unlock step2 when IBW done
+  }
+}
+
+// Check if we can show next step CTA on dashboard
+function canProceedToStep2() {
+  return state.results.ibw !== null && state.results.ajbw !== null;
+}
+function canProceedToStep3() {
+  return state.results.harris !== null || state.results.mifflin !== null || state.results.curreri !== null;
+}
+
+// ── NEXT STEP PROMPT (shown below result) ──
+function nextStepPrompt() {
+  const r = state.results;
+  const step = state.flowStep;
+
+  // After all step1 done — prompt to move to step2
+  if (step === 'step1' && r.bmi !== null && r.ibw !== null && r.ajbw !== null) {
+    state.flowStep = 'step2';
+    return `
+      <div class="next-step-section">
+        <div class="next-step-title">All anthropometric values calculated ✓</div>
+        <div class="next-step-sub">Proceed to select a BMR/energy formula.</div>
+        <div class="next-step-cards">
+          <div class="next-card" onclick="goToDashboardStep('step2')">
+            <span class="next-card-icon">→</span>
+            <div class="next-card-body">
+              <h4>Next: Select BMR Formula</h4>
+              <p>Harris-Benedict, Mifflin St. Jeor, or Curreri</p>
+            </div>
+            <span class="next-card-arrow">→</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // After IBW done but not AjBW — suggest AjBW
+  if (step === 'step1' && r.ibw !== null && r.ajbw === null && state.currentFormula === 'ibw') {
+    return `
+      <div class="next-step-section">
+        <div class="next-step-title">Good — now calculate AjBW</div>
+        <div class="next-step-sub">Adjusted Body Weight requires IBW (just calculated).</div>
+        <div class="next-step-cards">
+          <div class="next-card" onclick="openFormula('ajbw')">
+            <span class="next-card-icon">⚖️</span>
+            <div class="next-card-body"><h4>Adjusted Body Weight</h4><p>Uses the IBW you just calculated</p></div>
+            <span class="next-card-arrow">→</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // After Harris or Mifflin — prompt to step3
+  if ((state.currentFormula === 'harris' || state.currentFormula === 'mifflin') && canProceedToStep3()) {
+    if (state.flowStep === 'step2') state.flowStep = 'step3';
+    return `
+      <div class="next-step-section">
+        <div class="next-step-title">BMR calculated ✓</div>
+        <div class="next-step-sub">Proceed to apply adjustment factors.</div>
+        <div class="next-step-cards">
+          <div class="next-card" onclick="goToDashboardStep('step3')">
+            <span class="next-card-icon">→</span>
+            <div class="next-card-body">
+              <h4>Next: Adjustment Factors</h4>
+              <p>Injury Factor, Physical Activity Level, or both</p>
+            </div>
+            <span class="next-card-arrow">→</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  return '';
+}
+
+function goToDashboardStep(step) {
+  state.flowStep = step;
+  goTo('dashboard');
+  renderDashboard();
+}
+</script>
 </body>
 </html>
